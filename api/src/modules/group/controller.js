@@ -2,12 +2,17 @@ const groupServices = require('./service');
 
 const groupController = {
     creatGroup: (req, res) => {
-        return groupServices.creatGroup(req.user.id, req.body)
+        return groupServices.creatGroup(req.user.id, req.body, req.file)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
     joinGroup: (req, res) => {
         return groupServices.joinGroup(req.user.id, req.params.id)
+                .then((result) => res.status(result.status).send({message: result.message}))
+                .catch((err) => res.status(err.status).send({ message: err.message }));
+    },
+    leaveGroup: (req, res) => {
+        return groupServices.leaveGroup(req.user.id, req.params.id)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
@@ -27,12 +32,12 @@ const groupController = {
                 .catch((err) => res.status(err.status).send(err.message))
     },
     updateGroup: (req, res) => {
-        return groupServices.updateGroup(req.params.id, req.body)
+        return groupServices.updateGroup(req.user.id, req.params.id, req.body, req.file)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
     deleteGroup: (req, res) => {
-        return groupServices.deleteGroup(req.params.id)
+        return groupServices.deleteGroup(req.user.id, req.params.id)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send(err.message));
     }
