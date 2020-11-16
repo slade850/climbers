@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const userService = {
     register: (body) => {
         return new Promise((resolve, reject) => {
-            let { lastName, firstName, pseudo, email, password, passConfirm} = body;
+            let { lastName, firstName, pseudo, email, password, passConfirm } = body;
              console.log("*****body ***", body);
             if (
             typeof lastName !== "string" ||
@@ -50,10 +50,11 @@ const userService = {
             userQueries.login(login)
                 .then((result) => {
                     if (bcrypt.compareSync(password, result.password)) {
-                        let token = jwt.sign({ id: result.id, pseudo: result.pseudo, role: result.role },
+                        let token = jwt.sign({ id: result.id, pseudo: result.pseudo, role: result.role, avatar: result.avatar },
                                     process.env.SECRET_TOKEN,
                                     { expiresIn: 3600 }
                                     );
+                        userQueries.last_logon(result.id)            
                 resolve({
                     status: 200,
                     message: "user is logged in",
@@ -80,6 +81,52 @@ const userService = {
                     status: 200,
                     message: "user found",
                     user: user
+                })
+            })
+            .catch(err => reject({
+                status: 400,
+                message: "user not found",
+            }))
+        })
+    },
+    addContact: (id, contactId) => {
+        return new Promise((resolve, reject) => {
+            userQueries.addContact(id, contactId)
+            .then(result => {
+                resolve({
+                    status: 200,
+                    message: "invitation send"
+                })
+            })
+            .catch(err => reject({
+                status: 400,
+                message: "an error occurred"
+            }))
+        })
+    },
+    acceptContact: (id, body) => {
+        return new Promise((resolve, reject) => {
+            userQueries.acceptContact(id, body)
+            .then(result => {
+                resolve({
+                    status: 200,
+                    message: "contact added"
+                })
+            })
+            .catch(err => reject({
+                status: 400,
+                message: "an error occurred"
+            }))
+        })
+    },
+    getContact: (id) => {
+        return new Promise((resolve, reject) => {
+            userQueries.getContact(id)
+            .then(result => {
+                resolve({
+                    status: 200,
+                    message: "contacts found",
+                    contacts: result
                 })
             })
             .catch(err => reject({

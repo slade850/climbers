@@ -1,25 +1,31 @@
 const db = require("../../config/database");
-const initPrivate_messageTable = () => {
-        let sqlQuery = 'CREATE TABLE IF NOT EXISTS private_messages(id VARCHAR(100) PRIMARY KEY NOT NULL, message TEXT NOT NULL,view_by_sender INT NOT NULL,view_by_reciver INT NOT NULL,sender VARCHAR(100) ,reciver VARCHAR(100) ,FOREIGN KEY (sender) REFERENCES users(id),FOREIGN KEY (reciver) REFERENCES users(id))';
-        return db.query(sqlQuery, (err, result) => {
-                err ? console.log(err) : console.log("private_messages Table ready");
-        });
-}; 
 
-initPrivate_messageTable();
 const Query = {
-    creatPrivate_message: (body) => {
-        const {id, message,view_by_sender,view_by_reciver,sender,reciver} = body;
+    creatPrivate_message: (userId, body) => {
+        const {id, message, reciver} = body;
         return new Promise((resolve, reject) => {
-            let sqlQuery = `INSERT INTO private_messages (id, message, view_by_sender, view_by_reciver, sender, reciver) VALUES ("${id}", "${message}", "${view_by_sender}", "${view_by_reciver}", "${sender}", "${reciver}")`;
+            let date = new Date().toLocaleString();
+            let sqlQuery = `INSERT INTO private_messages (id, created_at, message, sender, reciver) VALUES ("${id}", "${date}", "${message}", "${userId}", "${reciver}")`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
         });
     },
-    readPrivate_message: () => {
+    readPrivate_message: (userId, contactId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT * FROM private_messages`;
+            let sqlQuery = `SELECT * FROM private_messages WHERE (sender = "${userId}" AND reciver = "${contactId}" AND view_by_sender = 1 AND friend_request = 0) OR (reciver = "${userId}" AND sender = "${contactId}" AND view_by_reciver = 1 AND friend_request = 0) `;
+            let sqlQuery2 = `UPDATE private_messages SET reading = 1 WHERE (reciver = "${userId}" AND sender = "${contactId}")`;
+            db.query(sqlQuery, (err, result) => {
+                if(err) reject(err);
+                db.query(sqlQuery2, (err2, result2) => {
+                    err2 ? reject(err2) : resolve(result);
+                })
+            });
+        });
+    },
+    readInvitation: (userId) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `SELECT * FROM private_messages WHERE reciver = "${userId}" AND friend_request = 1`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
@@ -34,19 +40,23 @@ const Query = {
         });
     },
     updatePrivate_message: (id, body) => {
-        const {message,view_by_sender,view_by_reciver,sender,reciver} = body;
+        const {message} = body;
         return new Promise((resolve, reject) => {
-            let sqlQuery = `UPDATE private_messages SET "message = "${message}", view_by_sender = "${view_by_sender}", view_by_reciver = "${view_by_reciver}", sender = "${sender}", reciver = "${reciver}"" WHERE id = "${id}"`;
+            let sqlQuery = `UPDATE private_messages SET message = "${message}" WHERE id = "${id}"`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
         });
     },
-    deletePrivate_message: (id) => {
+    deletePrivate_message: (id, userId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `DELETE FROM private_messages WHERE id = "${id}"`;
+            let sqlQuery = `SELECT * FROM private_messages WHERE id = "${id}"`;
             db.query(sqlQuery, (err, result) => {
-                err ? reject(err) : resolve(result);
+                if(err) reject(err);  
+                let update = result[0].sender == userId ? 'UPDATE private_messages SET view_by_sender = 0' : 'UPDATE private_messages SET view_by_reciver = 0';
+                db.query(update, (err2, result2) => {
+                    err2 ? reject(err2) : resolve(result2);
+                })
             });
         });
     },

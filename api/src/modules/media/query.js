@@ -1,43 +1,43 @@
 const db = require("../../config/database");
 
 const Query = {
-    creatEvent: (body) => {
-        const {id, name,description,minUsers,maxUsers,group} = body;
+    creatMedia: (body) => {
+        const {id, type,path,post_id,user_id} = body;
         return new Promise((resolve, reject) => {
-            let sqlQuery = `INSERT INTO events (id, name, description, minUsers, maxUsers, group) VALUES ("${id}", "${name}", "${description}", "${minUsers}", "${maxUsers}", "${group}")`;
+            let sqlQuery = `INSERT INTO medias (id, type, path, post_id, user_id) VALUES ("${id}", "${type}", "${path}", "${post_id}", "${user_id}")`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
         });
     },
-    readEvent: () => {
+    readMedia: () => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT * FROM events`;
+            let sqlQuery = `SELECT * FROM medias`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
         });
     },
-    readOneEvent: (id) => {
+    readOneMedia: (id) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT * FROM events WHERE id = "${id}"`;
+            let sqlQuery = `SELECT * FROM medias WHERE id = "${id}"`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result[0]); // the result is always an array[0]
             });
         });
     },
-    updateEvent: (id, body) => {
-        const {name,description,minUsers,maxUsers,group} = body;
+    updateMedia: (id, body) => {
+        const {type,path,post_id,user_id} = body;
         return new Promise((resolve, reject) => {
-            let sqlQuery = `UPDATE events SET "name = "${name}", description = "${description}", minUsers = "${minUsers}", maxUsers = "${maxUsers}", group = "${group}"" WHERE id = "${id}"`;
+            let sqlQuery = `UPDATE medias SET "type = "${type}", path = "${path}", post_id = "${post_id}", user_id = "${user_id}"" WHERE id = "${id}"`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
         });
     },
-    deleteEvent: (id) => {
+    deleteMedia: (id) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `DELETE FROM events WHERE id = "${id}"`;
+            let sqlQuery = `DELETE FROM medias WHERE id = "${id}"`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

@@ -1,5 +1,6 @@
 const express = require("express")
 const router = express.Router();
+const authorize = require('../../middle/authorize');
 const eventController = require('./controller'); 
 
 router.get("/", eventController.readEvent);

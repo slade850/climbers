@@ -1,52 +1,40 @@
 const db = require("../../config/database");
-const initCommentTable = () => {
-        let sqlQuery = 'CREATE TABLE IF NOT EXISTS comments(id VARCHAR(100) PRIMARY KEY NOT NULL, comment TEXT NULL,like_option VARCHAR(255) NULL,user VARCHAR(100) ,post VARCHAR(100) ,FOREIGN KEY (user) REFERENCES users(id),FOREIGN KEY (post) REFERENCES posts(id))';
-        return db.query(sqlQuery, (err, result) => {
-                err ? console.log(err) : console.log("comments Table ready");
-        });
-}; 
 
-initCommentTable();
 const Query = {
-    creatComment: (body) => {
-        const {id, comment,like_option,user,post} = body;
+    creatComment: (userId, body) => {
+        const {id,comment,post_id} = body;
         return new Promise((resolve, reject) => {
-            let sqlQuery = `INSERT INTO comments (id, comment, like_option, user, post) VALUES ("${id}", "${comment}", "${like_option}", "${user}", "${post}")`;
+            let date = new Date().toLocaleString();
+            let sqlQuery = `INSERT INTO comments (id, created_at, comment, user_id, post_id) VALUES ("${id}", "${date}", "${comment}", "${userId}", "${post_id}")`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
         });
     },
-    readComment: () => {
+    updateComment: (userId,id, body) => {
+        const {comment} = body;
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT * FROM comments`;
+            let date = new Date().toLocaleString();
+            let sqlQuery = `UPDATE comments SET comment="${comment}", updated_at="${date}" WHERE id = "${id}" AND user_id = "${userId}"`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
         });
     },
-    readOneComment: (id) => {
+    deleteComment: (user, id) => {
         return new Promise((resolve, reject) => {
             let sqlQuery = `SELECT * FROM comments WHERE id = "${id}"`;
+            let hideComment = `UPDATE comments SET active=0 WHERE id = "${id}"`;
             db.query(sqlQuery, (err, result) => {
-                err ? reject(err) : resolve(result[0]); // the result is always an array[0]
-            });
-        });
-    },
-    updateComment: (id, body) => {
-        const {comment,like_option,user,post} = body;
-        return new Promise((resolve, reject) => {
-            let sqlQuery = `UPDATE comments SET "comment = "${comment}", like_option = "${like_option}", user = "${user}", post = "${post}"" WHERE id = "${id}"`;
-            db.query(sqlQuery, (err, result) => {
-                err ? reject(err) : resolve(result);
-            });
-        });
-    },
-    deleteComment: (id) => {
-        return new Promise((resolve, reject) => {
-            let sqlQuery = `DELETE FROM comments WHERE id = "${id}"`;
-            db.query(sqlQuery, (err, result) => {
-                err ? reject(err) : resolve(result);
+                if(err){
+                    reject(err);
+                }else if((result[0].user == user.id) || ["admin", "moderator"].includes(user.role)){
+                    db.query(hideComment, (err2, result2) => {
+                        err2 ? reject(err2) : resolve({update: true});
+                    })
+                }else{
+                    resolve({update: false});
+                }
             });
         });
     },

@@ -22,6 +22,21 @@ getById: (req, res) => {
         .then((result) => res.status(result.status).send({message: result.message, user: result.user}))
         .catch((err) => res.status(err.status).send(err.message));
     },
+addContact: (req, res) => {
+    userServices.addContact(req.user.id, req.body.contactId)
+    .then((result) => res.status(result.status).send({message: result.message}))
+    .catch((err) => res.status(err.status).send(err.message));
+    },
+acceptContact: (req, res) => {
+    userServices.acceptContact(req.user.id, req.body)
+    .then((result) => res.status(result.status).send({message: result.message}))
+    .catch((err) => res.status(err.status).send(err.message));
+},    
+getContact: (req, res) => {
+    userServices.getContact(req.user.id)
+        .then((result) => res.status(result.status).send({message: result.message, contacts: result.contact}))
+        .catch((err) => res.status(err.status).send(err.message));
+    },       
 };
 
 module.exports = userController;

@@ -1,26 +1,31 @@
-const postServices = require('./service'); 
+const mediaServices = require('./service'); 
 
-const postController = {
-    creatPost: (req, res) => {
-        return postServices.creatPost(req.user.id, req.body)
+const mediaController = {
+    creatMedia: (req, res) => {
+        return mediaServices.creatMedia(req.body)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
-    readPost: (req, res) => {
-        return postServices.readPost()
+    readMedia: (req, res) => {
+        return mediaServices.readMedia()
                 .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
-    updatePost: (req, res) => {
-        return postServices.updatePost(req.user.id, req.params.id, req.body)
+    readOneMedia: (req, res) => {
+        return mediaServices.readOneMedia(req.params.id)
+                .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
+                .catch((err) => res.status(err.status).send(err.message))
+    },
+    updateMedia: (req, res) => {
+        return mediaServices.updateMedia(req.params.id, req.body)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
-    deletePost: (req, res) => {
-        return postServices.deletePost(req.user, req.params.id)
+    deleteMedia: (req, res) => {
+        return mediaServices.deleteMedia(req.params.id)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send(err.message));
     }
 }; 
 
-module.exports = postController;
+module.exports = mediaController;

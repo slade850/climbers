@@ -19,7 +19,7 @@ const authorize = (roles = []) => {
                 return res.status(401).json({ message: 'Unauthorized' });
             }
             // authentication and authorization successful
-            req.user = { id: decoded.id, role: decoded.role, pseudo: decoded.pseudo};
+            req.user = { id: decoded.id, role: decoded.role, pseudo: decoded.pseudo, avatar: decoded.avatar };
             next();
         })
     }; 
