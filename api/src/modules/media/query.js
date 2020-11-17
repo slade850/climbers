@@ -1,10 +1,19 @@
 const db = require("../../config/database");
 
 const Query = {
-    creatMedia: (body) => {
-        const {id, type,path,post_id,user_id} = body;
+    creatMediaForMessage: (userId, body) => {
+        const {id, type,path,message_id} = body;
         return new Promise((resolve, reject) => {
-            let sqlQuery = `INSERT INTO medias (id, type, path, post_id, user_id) VALUES ("${id}", "${type}", "${path}", "${post_id}", "${user_id}")`;
+            let sqlQuery = `INSERT INTO medias (id, type, path, message_id, user_id) VALUES ("${id}", "${type}", "${path}", "${message_id}", "${userId}")`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : resolve(result);
+            });
+        });
+    },
+    creatMediaForPost: (userId, body) => {
+        const {id, type,path,post_id} = body;
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `INSERT INTO medias (id, type, path, post_id, user_id) VALUES ("${id}", "${type}", "${path}", "${post_id}", "${userId}")`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
@@ -26,10 +35,25 @@ const Query = {
             });
         });
     },
-    updateMedia: (id, body) => {
-        const {type,path,post_id,user_id} = body;
+    readMediaInPost: (id) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `UPDATE medias SET "type = "${type}", path = "${path}", post_id = "${post_id}", user_id = "${user_id}"" WHERE id = "${id}"`;
+            let sqlQuery = `SELECT * FROM medias WHERE post_id = "${id}"`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : resolve(result); // the result is always an array[0]
+            });
+        });
+    },
+    readMediaInMessage: (id) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `SELECT * FROM medias WHERE message_id = "${id}"`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : resolve(result); // the result is always an array[0]
+            });
+        });
+    },
+    readMediaSharedWithMe: () => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `SELECT * FROM medias`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

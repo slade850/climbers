@@ -1,12 +1,29 @@
 const postQueries = require("./query");
 const { v4: uuidv4 } = require('uuid'); 
+const mediaQuery = require('../media/query'); 
 
 const postService = {
-    creatPost: async (userId, body) => {
+    creatPost: async (userId, body, files) => {
         const id = uuidv4();
-        body.id = id; 
+        body.id = id;
         return postQueries.creatPost(userId, body)
-                .then((result) => ({status: 201, message: "Creation Success"}))
+                .then((result) => {
+                    if(files){
+                        files.forEach(file => {
+                            const fileId = uuidv4();
+                            const media = {
+                                id: fileId, 
+                                type: file.mimetype.split('/')[0] == "image" ? "image" : file.mimetype.split('/')[1] == 'pdf' ? "doc" : "video",
+                                path: `medias/${file.filename}`,
+                                post_id: id
+                            };
+                            mediaQuery.creatMediaForPost(userId, media)
+                            .then(mediaResult => mediaResult)
+                            .catch(mediaErr => mediaErr)
+                        });
+                    } 
+                    return ({status: 201, message: "Creation Success"})
+                })
                 .catch((err) => ({status: 400, message: err}));
     },
     readPost: async () => {
@@ -16,14 +33,15 @@ const postService = {
                         const globalRes = await Promise.all(result.map(async (post) => {
                             let commentsByPost = await postQueries.readCommentsByPost(post.id);
                             let likesByPost = await postQueries.readLikeByPost(post.id);
-                            return ({...post, comments: commentsByPost, likes: likesByPost})
+                            let mediaInPost = await mediaQuery.readMediaInPost(post.id);
+                            return ({...post, medias: mediaInPost, comments: commentsByPost, likes: likesByPost})
                         }))
                         return ({status: 200, message: "success", data: globalRes});
                     } else{
-                        throw new Error({status: 400, message: "no posts found"});
+                        return ({status: 200, message: "no posts found", data: null});
                     }
                 })
-                .catch((err) => ({status: 400, message: 'test'}))
+                .catch((err) => ({status: 400, message: 'an error occurred'}))
     },
     updatePost: async (userId, id, body) => {
         return postQueries.updatePost(userId, id, body)

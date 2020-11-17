@@ -14,6 +14,7 @@ const userRoutes = require('./modules/user/routes');
 const eventRoutes = require('./modules/event/routes');
 const groupRoutes = require('./modules/group/routes');
 require('./config/database');
+const authorize = require('./middle/authorize');
 
 app.use(cors({
     origin: true,
@@ -22,11 +23,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(__dirname + '/public'));
-app.use(express.static(__dirname + '/public/html')); 
+app.use(express.static('public')); 
 
 app.get('/api/', (req, res) => {
    res.send('wellcome to fastBlock API')
+})
+app.get('/medias/:filename' , authorize(["user","moderator","admin"]), express.static('files'), (req, res) => {
+    res.sendFile(`medias/${req.params.filename}`)
+})
+app.get('/groupPictures/:filename' , authorize(["user","moderator","admin"]), express.static('files'), (req, res) => {
+    res.sendFile(`groupPictures/${req.params.filename}`)
+})
+app.get('/avatars/:filename' , authorize(["user","moderator","admin"]), express.static('files'), (req, res) => {
+    res.sendFile(`avatars/${req.params.filename}`)
 })
 //add new route
 app.use('/api/media', mediaRoutes);

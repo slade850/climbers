@@ -5,7 +5,8 @@ const fs = require('fs');
 const groupService = {
     creatGroup: async (userId, body, file) => {
         const id = uuidv4();
-        body.id = id; 
+        body.id = id;
+        body.picture = file.filename ? `groupPictures/${file.filename}` : 'groupPictures/default.jpg';
         return groupQueries.creatGroup(userId, body, file)
                 .then((result) => ({status: 201, message: "Creation Success"}))
                 .catch((err) => ({status: 400, message: err}));
@@ -40,7 +41,7 @@ const groupService = {
         body.name = body.name ? body.name : groupInfo.name;
         body.description = body.description ? body.description : groupInfo.description;
         body.picture = file.filename ? file.filename : groupInfo.picture;
-        if(file.filename && groupInfo.picture){
+        if(file.filename && groupInfo.picture && groupInfo.picture != 'groupPictures/default.jpg'){
             fs.unlinkSync(`./files/groupPictures/${groupInfo.picture}`)
         }
         return groupQueries.updateGroup(userId, id, body)

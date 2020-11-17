@@ -3,10 +3,16 @@ const userServices = require('./service');
 const userController = {
 register: (req, res) => {
     userServices
-        .register(req.body)
+        .register(req.body, req.file)
         .then((result) => res.status(result.status).send({message: result.message}))
         .catch((err) => res.status(err.status).send({ message: err.message }));
     },
+updateAvatar: (req, res) => {
+    userServices
+        .updateAvatar(req.user.id, req.file)
+        .then((result) => res.status(result.status).send({message: result.message}))
+        .catch((err) => res.status(err.status).send({ message: err.message }));
+    },    
 login: (req, res) => {
     userServices
         .login(req.body)

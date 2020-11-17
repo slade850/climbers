@@ -14,6 +14,14 @@ const Query = {
             });
         });
     },
+    updateAvatar: (id, avatar) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `UPDATE users SET avatar= "${avatar}" WHERE id = "${id}"`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : resolve(result[0]);
+            });
+        });
+    },
     login: (userLogin) => {
         return new Promise((resolve, reject) => {
             let sqlQuery = `SELECT * FROM users WHERE (email= "${userLogin}" OR pseudo= "${userLogin}")`;

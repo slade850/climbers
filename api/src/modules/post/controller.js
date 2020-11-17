@@ -2,7 +2,7 @@ const postServices = require('./service');
 
 const postController = {
     creatPost: (req, res) => {
-        return postServices.creatPost(req.user.id, req.body)
+        return postServices.creatPost(req.user.id, req.body, req.files)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },

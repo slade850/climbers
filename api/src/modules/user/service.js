@@ -2,9 +2,10 @@ const bcrypt = require("bcrypt");
 const userQueries = require("./query");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 
 const userService = {
-    register: (body) => {
+    register: (body, file) => {
         return new Promise((resolve, reject) => {
             let { lastName, firstName, pseudo, email, password, passConfirm } = body;
              console.log("*****body ***", body);
@@ -20,14 +21,16 @@ const userService = {
         }
         if (password === passConfirm) {
             let id = uuidv4();
+            let avatar = file.filename ? `avatars/${file.filename}` : 'avatars/default.jpg'
             bcrypt.genSalt()
                 .then((salt) => bcrypt.hash(password, salt))
                 .then((hashedPassword) =>
-                userQueries.register({ id, lastName, firstName, pseudo, email, hashedPassword})
+                userQueries.register({ id, lastName, firstName, pseudo, email, avatar, hashedPassword})
             )
             .then((user) => resolve({ status: 201, message: "new user created" }))
             .catch((err) => {
                 console.log(err);
+                if(file.filename) fs.unlinkSync(`./files/avatars/${file.filename}`);
                 if(err.sqlMessage.includes('pseudo')){
                     reject({ status: 401, message: "this pseudo already used!" })
                 } else if(err.sqlMessage.includes('email')){
@@ -41,6 +44,17 @@ const userService = {
         }
         });
     },
+    updateAvatar: async (userId, file) => {
+        console.log(userId)
+        const avatar = `avatars/${file.filename}`;
+        const info = await userQueries.getUser(userId);
+        if(info.avatar && info.avatar != 'avatar/default.jpg'){
+            fs.unlinkSync(`./files/${info.avatar}`)
+        }
+        return userQueries.updateAvatar(userId, avatar)
+            .then(result => ({ status: 200, message: "avatar updated" }))
+            .catch(err => ({ status: 400, message: err }))
+    },
     login: (body) => {
         return new Promise((resolve, reject) => {
             let { login, password } = body;
@@ -52,7 +66,7 @@ const userService = {
                     if (bcrypt.compareSync(password, result.password)) {
                         let token = jwt.sign({ id: result.id, pseudo: result.pseudo, role: result.role, avatar: result.avatar },
                                     process.env.SECRET_TOKEN,
-                                    { expiresIn: 3600 }
+                                    { expiresIn: 86400 }
                                     );
                         userQueries.last_logon(result.id)            
                 resolve({

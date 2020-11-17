@@ -2,12 +2,12 @@ const mediaServices = require('./service');
 
 const mediaController = {
     creatMedia: (req, res) => {
-        return mediaServices.creatMedia(req.body)
+        return mediaServices.creatMedia(req.user.id, req.body, req.file)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
     readMedia: (req, res) => {
-        return mediaServices.readMedia()
+        return mediaServices.readMedia(req.user.id)
                 .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
@@ -16,9 +16,9 @@ const mediaController = {
                 .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
                 .catch((err) => res.status(err.status).send(err.message))
     },
-    updateMedia: (req, res) => {
-        return mediaServices.updateMedia(req.params.id, req.body)
-                .then((result) => res.status(result.status).send({message: result.message}))
+    readMediaSharedWithMe: (req, res) => {
+        return mediaServices.readMediaSharedWithMe(req.user.id)
+                .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
     deleteMedia: (req, res) => {

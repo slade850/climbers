@@ -1,17 +1,45 @@
 const private_messageQueries = require("./query");
-const { v4: uuidv4 } = require('uuid'); 
+const { v4: uuidv4 } = require('uuid');
+const mediaQuery = require('../media/query'); 
 
 const private_messageService = {
-    creatPrivate_message: async (userId, body) => {
+    creatPrivate_message: async (userId, body, files) => {
         const id = uuidv4();
-        body.id = id; 
+        body.id = id;
+        
         return private_messageQueries.creatPrivate_message(userId, body)
-                .then((result) => ({status: 201, message: "message sent"}))
+                .then((result) => {
+                    if(files){
+                        files.forEach(file => {
+                            const fileId = uuidv4();
+                            const media = {
+                                id: fileId, 
+                                type: file.mimetype.split('/')[0] == "image" ? "image" : file.mimetype.split('/')[1] == 'pdf' ? "doc" : "video",
+                                path: `medias/${file.filename}`,
+                                message_id: id
+                            };
+                            mediaQuery.creatMediaForMessage(userId, media)
+                            .then(mediaResult => mediaResult)
+                            .catch(mediaErr => mediaErr)
+                        });
+                    }
+                    return ({status: 201, message: "message sent"});
+                })
                 .catch((err) => ({status: 400, message: err}));
     },
     readPrivate_message: async (userId, contactId) => {
         return private_messageQueries.readPrivate_message(userId, contactId)
-                .then((result) => ({status: 200, data: result}))
+                .then(async (result) => {
+                    if(result.length){
+                        const globalRes = await Promise.all(result.map(async (message) => {
+                            let mediaInMessage = await mediaQuery.readMediaInMessage(message.id);
+                            return ({...message, medias: mediaInMessage})
+                        }))
+                        return ({status: 200, data: globalRes});
+                    } else{
+                        return ({status: 200, data: result});
+                    }
+                })
                 .catch((err) => ({status: 400, message: err}));
     },
     readInvitation: async (userId) => {

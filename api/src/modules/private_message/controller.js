@@ -2,7 +2,7 @@ const private_messageServices = require('./service');
 
 const private_messageController = {
     creatPrivate_message: (req, res) => {
-        return private_messageServices.creatPrivate_message(req.user.id, req.body)
+        return private_messageServices.creatPrivate_message(req.user.id, req.body, req.files)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },

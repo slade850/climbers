@@ -2,13 +2,15 @@ const mediaQueries = require("./query");
 const { v4: uuidv4 } = require('uuid'); 
 
 const mediaService = {
-    creatMedia: async (body) => {
+    /* creatMedia: async (userId, body, files) => {
         const id = uuidv4();
-        body.id = id; 
+        body.id = id;
+        body.type = file.mimetype.split('/')[0] == "image" ? "image" : file.mimetype.split('/')[1] == 'pdf' ? "doc" : "video";
+        body.name = 
         return mediaQueries.creatMedia(body)
                 .then((result) => ({status: 201, message: "Creation Success"}))
                 .catch((err) => ({status: 400, message: err}));
-    },
+    }, */
     readMedia: async () => {
         return mediaQueries.readMedia()
                 .then((result) => ({status: 200, data: result}))
@@ -19,9 +21,9 @@ const mediaService = {
                 .then((result) => ({status: 200, data: result}))
                 .catch((err) => ({status: 400, message: err}));
     },
-    updateMedia: async (id, body) => {
-        return mediaQueries.updateMedia(id, body)
-                .then((result) => ({status: 201, message: "Update Success"}))
+    readMediaSharedWithMe: async () => {
+        return mediaQueries.readMediaSharedWithMe()
+                .then((result) => ({status: 200, data: result}))
                 .catch((err) => ({status: 400, message: err}));
     },
     deleteMedia: async (id) => {

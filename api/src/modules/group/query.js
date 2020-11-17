@@ -2,7 +2,7 @@ const db = require("../../config/database");
 
 const Query = {
     creatGroup: (userId, body) => {
-        const {id, name,picture,description,active} = body;
+        const {id, name,picture,description} = body;
         return new Promise((resolve, reject) => {
             let date = new Date().toLocaleString();
             let sqlQuery = `INSERT INTO groups (id, created_at, name, picture, description) VALUES ("${id}", "${date}", "${name}", "${picture}", "${description}")`;
@@ -63,7 +63,6 @@ const Query = {
     },
     updateGroup: (userId, id, body) => {
         const {name,picture,description} = body;
-        console.log(name,picture,description);
         return new Promise((resolve, reject) => {
             let sqlCheck = `SELECT role FROM groups_members WHERE group_id = "${id}" AND user_id = "${userId}"`;
             let sqlQuery = `UPDATE groups SET name="${name}", picture="${picture}", description="${description}" WHERE id = "${id}"`;
