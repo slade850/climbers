@@ -4,10 +4,10 @@ const { v4: uuidv4 } = require('uuid');
 // Our query is performed on the database and the data is sent back to the service.
 const Query = {
     register: (user) => {
-        const {id, lastName, firstName, pseudo, email, hashedPassword} = user;
+        const {id, lastName, firstName, pseudo, email, avatar, hashedPassword} = user;
         return new Promise((resolve, reject) => {
             const date = new Date().toLocaleString();
-            let sqlQuery = `INSERT INTO users (id, created_at, lastName, firstName, pseudo, email, password) VALUES ("${id}", "${date}", "${lastName}", "${firstName}", "${pseudo}", "${email}", "${hashedPassword}")`;
+            let sqlQuery = `INSERT INTO users (id, created_at, lastName, firstName, pseudo, email, avatar, password) VALUES ("${id}", "${date}", "${lastName}", "${firstName}", "${pseudo}", "${email}", "${avatar}","${hashedPassword}")`;
             //role ="user", role is added as a default for the Enum in the database
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);

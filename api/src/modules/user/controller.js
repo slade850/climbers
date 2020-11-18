@@ -2,8 +2,9 @@ const userServices = require('./service');
 
 const userController = {
 register: (req, res) => {
+    const file = req.file || undefined;
     userServices
-        .register(req.body, req.file)
+        .register(req.body, file)
         .then((result) => res.status(result.status).send({message: result.message}))
         .catch((err) => res.status(err.status).send({ message: err.message }));
     },

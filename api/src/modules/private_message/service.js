@@ -6,7 +6,6 @@ const private_messageService = {
     creatPrivate_message: async (userId, body, files) => {
         const id = uuidv4();
         body.id = id;
-        
         return private_messageQueries.creatPrivate_message(userId, body)
                 .then((result) => {
                     if(files){

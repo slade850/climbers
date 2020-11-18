@@ -21,7 +21,8 @@ const userService = {
         }
         if (password === passConfirm) {
             let id = uuidv4();
-            let avatar = file.filename ? `avatars/${file.filename}` : 'avatars/default.jpg'
+            let avatar = file ? `avatars/${file.filename}` : 'avatars/default.jpg';
+            console.log(avatar);
             bcrypt.genSalt()
                 .then((salt) => bcrypt.hash(password, salt))
                 .then((hashedPassword) =>
