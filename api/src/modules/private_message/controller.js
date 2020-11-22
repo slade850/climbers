@@ -7,9 +7,14 @@ const private_messageController = {
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
+    viewAllCurrentConversations: (req, res) => {
+        return private_messageServices.viewAllCurrentConversations(req.user.id)
+                .then((result) => res.status(result.status).send({data: result.data}))
+                .catch((err) => res.status(err.status).send(err.message));
+    },
     readPrivate_message: (req, res) => {
         return private_messageServices.readPrivate_message(req.user.id, req.params.contactId)
-                .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
+                .then((result) => res.status(result.status).send({data: result.data}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
     readInvitation: (req, res) => {

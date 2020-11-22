@@ -1,6 +1,8 @@
 require('dotenv').config({path: ('apiConfig.env')});
 const express = require('express');
 const app = express();
+const http = require('http');
+const https = require('https');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const port = process.env.SERVER_PORT;
@@ -46,4 +48,13 @@ app.use('/api/post', postRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/event', eventRoutes);
 app.use('/api/group', groupRoutes);
-app.listen(port, console.log(`server started on port ${port}`));
+
+const httpServer = http.createServer(app);
+const io = require('socket.io')(httpServer);
+
+io.on('connection', client => {
+    client.on('event', data => { console.log(`new client connected: ${client}`)});
+    client.on('disconnect', () => { console.log(`client ${client} as disconnected`) });
+});
+
+httpServer.listen(port, console.log(`server started on port ${port}`));

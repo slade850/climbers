@@ -19,7 +19,7 @@ login: (req, res) => {
         .login(req.body)
         .then((result) => {
         let { password, ...user } = result.user;
-        res.cookie('token', { access_token: result.token }, { maxAge: 86400000, httpOnly: true, sameSite: true })
+        res.cookie('token', { access_token: result.token }, { maxAge: 86400000, httpOnly: true, sameSite: 'lax' })
         res.status(result.status).send({user: user , message: "you are logged in"})
         })
         .catch((err) => res.status(err.status).send(err.message));

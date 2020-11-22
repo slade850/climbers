@@ -26,6 +26,11 @@ const private_messageService = {
                 })
                 .catch((err) => ({status: 400, message: err}));
     },
+    viewAllCurrentConversations: async (userId) => {
+        return private_messageQueries.viewAllCurrentConversations(userId)
+                .then((result) => ({status: 200, data: result}))
+                .catch((err) => ({status: 400, message: err}));
+    },
     readPrivate_message: async (userId, contactId) => {
         return private_messageQueries.readPrivate_message(userId, contactId)
                 .then(async (result) => {
