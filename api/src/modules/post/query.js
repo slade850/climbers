@@ -13,7 +13,7 @@ const Query = {
     },
     readPost: () => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT posts.*, users.pseudo, users.avatar FROM posts, users WHERE posts.user = users.id`;
+            let sqlQuery = `SELECT posts.*, users.pseudo, users.avatar FROM posts, users WHERE posts.user = users.id ORDER BY posts.created_at DESC`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

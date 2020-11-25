@@ -31,7 +31,7 @@ const userService = {
             .then((user) => resolve({ status: 201, message: "new user created" }))
             .catch((err) => {
                 console.log(err);
-                if(file.filename) fs.unlinkSync(`./files/avatars/${file.filename}`);
+                if(file) fs.unlinkSync(`./files/avatars/${file.filename}`);
                 if(err.sqlMessage.includes('pseudo')){
                     reject({ status: 401, message: "this pseudo already used!" })
                 } else if(err.sqlMessage.includes('email')){
