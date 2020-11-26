@@ -1,11 +1,12 @@
 const db = require("../../config/database");
+const dateTime = require('../../utils/dateNow');
 
 const Query = {
     creatPost: (userId, body) => {
         const {id,title,text} = body;
         return new Promise((resolve, reject) => {
-            let date = new Date().toLocaleString();
-            let sqlQuery = `INSERT INTO posts (id, created_at, title, text, user) VALUES ("${id}", "${date}", "${title}", "${text}", "${userId}")`;
+            let date = dateTime();
+            let sqlQuery = `INSERT INTO posts (id, created_at, title, text, user) VALUES ("${id}", ${date}, "${title}", "${text}", "${userId}")`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
@@ -38,8 +39,8 @@ const Query = {
     updatePost: (userId, id, body) => {
         const {title,text} = body;
         return new Promise((resolve, reject) => {
-            let date = new Date().toLocaleString();
-            let sqlQuery = `UPDATE posts SET title="${title}", text="${text}", updated_at="${date}" WHERE id = "${id}" AND user = "${userId}"`;
+            let date = dateTime();
+            let sqlQuery = `UPDATE posts SET title="${title}", text="${text}", updated_at=${date} WHERE id = "${id}" AND user = "${userId}"`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

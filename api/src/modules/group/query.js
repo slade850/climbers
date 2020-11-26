@@ -1,11 +1,12 @@
 const db = require("../../config/database");
+const dateTime = require('../../utils/dateNow');
 
 const Query = {
     creatGroup: (userId, body) => {
         const {id, name,picture,description} = body;
         return new Promise((resolve, reject) => {
-            let date = new Date().toLocaleString();
-            let sqlQuery = `INSERT INTO groups (id, created_at, name, picture, description) VALUES ("${id}", "${date}", "${name}", "${picture}", "${description}")`;
+            let date = dateTime();
+            let sqlQuery = `INSERT INTO groups (id, created_at, name, picture, description) VALUES ("${id}", ${date}, "${name}", "${picture}", "${description}")`;
             let sqlQuery2 = `INSERT INTO groups_members (group_id, user_id, role) VALUES ("${id}", "${userId}", "admin")`;
             db.query(sqlQuery, (err, result) => {
                 if(err) reject(err);

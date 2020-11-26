@@ -8,7 +8,6 @@ const userService = {
     register: (body, file) => {
         return new Promise((resolve, reject) => {
             let { lastName, firstName, pseudo, email, password, passConfirm } = body;
-             console.log("*****body ***", body);
             if (
             typeof lastName !== "string" ||
             typeof firstName !== "string" ||
