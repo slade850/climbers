@@ -19,6 +19,11 @@ const likeService = {
                 .then((result) => ({status: 200, data: result}))
                 .catch((err) => ({status: 400, message: err}));
     },
+    updateLike: async (id, body) => {
+        return likeQueries.updateLike(id, body)
+                .then((result) => ({status: 200, message: "Updated"}))
+                .catch((err) => ({status: 400, message: err}));
+    },
     deleteLike: async (id) => {
         return likeQueries.deleteLike(id)
                 .then((result) => ({status: 200, message: "Deleted"}))

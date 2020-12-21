@@ -6,6 +6,7 @@ const likeController = require('./controller');
 router.get("/", authorize(["user","moderator","admin"]), likeController.readLike);
 router.post("/add", authorize(["user","moderator","admin"]), likeController.likePost);
 router.post("/create", authorize(["admin"]), likeController.creatLike);
-router.post("/delete/:id", authorize(["admin"]), likeController.deleteLike); 
+router.post("/update/:id", authorize(["admin"]), likeController.updateLike);
+router.delete("/delete/:id", authorize(["admin"]), likeController.deleteLike); 
 
 module.exports = router;

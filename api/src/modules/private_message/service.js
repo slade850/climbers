@@ -1,6 +1,8 @@
 const private_messageQueries = require("./query");
 const { v4: uuidv4 } = require('uuid');
-const mediaQuery = require('../media/query'); 
+const mediaQuery = require('../media/query');
+const userService = require("../user/service");
+const io = require('socket.io')();
 
 const private_messageService = {
     creatPrivate_message: async (userId, body, files) => {
@@ -15,7 +17,7 @@ const private_messageService = {
                                 id: fileId, 
                                 type: file.mimetype.split('/')[0] == "image" ? "image" : file.mimetype.split('/')[1] == 'pdf' ? "doc" : "video",
                                 path: `medias/${file.filename}`,
-                                message_id: id
+                                private_message_id: id
                             };
                             mediaQuery.creatMediaForMessage(userId, media)
                             .then(mediaResult => mediaResult)
@@ -31,8 +33,11 @@ const private_messageService = {
                 .then((result) => ({status: 200, data: result}))
                 .catch((err) => ({status: 400, message: err}));
     },
-    readPrivate_message: async (userId, contactId) => {
-        return private_messageQueries.readPrivate_message(userId, contactId)
+    readPrivate_message: async (userId, contactSlug) => {
+        try{
+            const contactId = await userService.getUserIdBySlug(contactSlug);
+            console.log(contactId);
+            return private_messageQueries.readPrivate_message(userId, contactId)
                 .then(async (result) => {
                     if(result.length){
                         const globalRes = await Promise.all(result.map(async (message) => {
@@ -45,6 +50,10 @@ const private_messageService = {
                     }
                 })
                 .catch((err) => ({status: 400, message: err}));
+        } catch (error){
+            throw {status: 400, message: error};
+        }
+    
     },
     readInvitation: async (userId) => {
         return private_messageQueries.readInvitation(userId)

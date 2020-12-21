@@ -12,6 +12,11 @@ const postController = {
                 .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
+    readPostByTheme: (req, res) => {
+        return postServices.readPostByTheme(req.params.theme)
+                .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
+                .catch((err) => res.status(err.status).send(err.message));
+    },
     updatePost: (req, res) => {
         return postServices.updatePost(req.user.id, req.params.id, req.body)
                 .then((result) => res.status(result.status).send({message: result.message}))

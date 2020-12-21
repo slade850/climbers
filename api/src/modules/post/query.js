@@ -12,9 +12,25 @@ const Query = {
             });
         });
     },
+    addThemeToPost: (postId, themeId) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `INSERT INTO posts_themes (post_id, theme_id) VALUES ("${postId}", "${themeId}")`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : resolve(result);
+            });
+        });
+    },
     readPost: () => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT posts.*, users.pseudo, users.avatar FROM posts, users WHERE posts.user = users.id ORDER BY posts.created_at DESC`;
+            let sqlQuery = `SELECT posts.*, themes.theme, users.pseudo, users.avatar FROM posts LEFT OUTER JOIN posts_themes ON posts.id = posts_themes.post_id LEFT OUTER JOIN themes ON posts_themes.theme_id = themes.id LEFT OUTER JOIN users ON posts.user = users.id ORDER BY posts.created_at DESC`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : resolve(result);
+            });
+        });
+    },
+    readPostByTheme: (theme) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `SELECT posts.*, themes.id AS theme_id, themes.theme, users.pseudo, users.avatar FROM posts, themes, users, posts_themes WHERE themes.theme = "${theme}" AND posts_themes.theme_id = themes.id AND posts.id = posts_themes.post_id AND posts.user = users.id ORDER BY posts.created_at DESC`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
@@ -22,7 +38,7 @@ const Query = {
     },
     readCommentsByPost: (postId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT comments.*, users.pseudo, users.avatar FROM comments, users WHERE comments.post_id = "${postId}" AND comments.active = 1 AND users.id = comments.user_id`;
+            let sqlQuery = `SELECT comments.*, users.pseudo, users.avatar FROM comments, users WHERE comments.post_id = "${postId}" AND comments.active = 1 AND users.id = comments.user_id ORDER BY comments.created_at DESC`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result)
             })

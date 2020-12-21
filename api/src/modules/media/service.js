@@ -1,5 +1,8 @@
 const mediaQueries = require("./query");
-const { v4: uuidv4 } = require('uuid'); 
+const { v4: uuidv4 } = require('uuid');
+const groupMessageQueries = require('../groupMessage/query');
+const privateMessageQuery = require('../private_message/query'); 
+const { promise } = require("../../config/database");
 
 const mediaService = {
     /* creatMedia: async (userId, body, files) => {
@@ -11,8 +14,8 @@ const mediaService = {
                 .then((result) => ({status: 201, message: "Creation Success"}))
                 .catch((err) => ({status: 400, message: err}));
     }, */
-    readMedia: async () => {
-        return mediaQueries.readMedia()
+    readMedia: async (userId) => {
+        return mediaQueries.readMedia(userId)
                 .then((result) => ({status: 200, data: result}))
                 .catch((err) => ({status: 400, message: err}));
     },
@@ -21,13 +24,19 @@ const mediaService = {
                 .then((result) => ({status: 200, data: result}))
                 .catch((err) => ({status: 400, message: err}));
     },
-    readMediaSharedWithMe: async () => {
-        return mediaQueries.readMediaSharedWithMe()
-                .then((result) => ({status: 200, data: result}))
-                .catch((err) => ({status: 400, message: err}));
+    readMediaSharedWithMe: async (userId) => {
+        try {
+            const groupMs = await groupMessageQueries.getAllGroupMessageId(userId);
+            const privateMs = await privateMessageQuery.getAllPrivate_messageId(userId);
+            const allMedias = await Promise.all(groupMs.concat(privateMs).map(async (ms) => await mediaQueries.readMediaSharedWithMe(ms.id)));
+            return {status: 200, data: allMedias.flat(), message: 'medias'}
+        } catch (error) {
+            throw {status: 400, message: error}
+        }
+        
     },
-    deleteMedia: async (id) => {
-        return mediaQueries.deleteMedia(id)
+    deleteMedia: async (user, id) => {
+        return mediaQueries.deleteMedia(user, id)
                 .then((result) => ({status: 200, message: "Deleted"}))
                 .catch((err) => ({status: 400, message: err}));
     }

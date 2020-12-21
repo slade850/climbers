@@ -27,6 +27,15 @@ const Query = {
             });
         });
     },
+    updateLike: (id, body) => {
+        const {type} = body;
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `UPDATE likes SET type="${type}" WHERE id = "${id}"`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : resolve(result);
+            });
+        });
+    },
     deleteLike: (id) => {
         return new Promise((resolve, reject) => {
             let sqlQuery = `DELETE FROM likes WHERE id = "${id}"`;

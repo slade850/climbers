@@ -10,18 +10,22 @@ const authorize = (roles = []) => {
 
         // authorize based on user role
     return  (req, res, next) => {
-        jwt.verify(req.cookies['token'].access_token, process.env.SECRET_TOKEN, (err, decoded) => {
-            if(err){
-                return res.status(401).json({ message: 'Unauthorized' });
-            }
-            if(roles.length && !roles.includes(decoded.role)) {
-                // user's role is not authorized
-                return res.status(401).json({ message: 'Unauthorized' });
-            }
-            // authentication and authorization successful
-            req.user = { id: decoded.id, role: decoded.role, pseudo: decoded.pseudo, avatar: decoded.avatar };
-            next();
-        })
+        if("token" in req.cookies && "access_token" in req.cookies["token"]){
+            jwt.verify(req.cookies['token'].access_token, process.env.SECRET_TOKEN, (err, decoded) => {
+                if(err){
+                    return res.status(401).json({ message: 'Unauthorized' });
+                }
+                if(roles.length && !roles.includes(decoded.role)) {
+                    // user's role is not authorized
+                    return res.status(401).json({ message: 'Unauthorized' });
+                }
+                // authentication and authorization successful
+                req.user = { id: decoded.id, role: decoded.role, pseudo: decoded.pseudo, avatar: decoded.avatar };
+                next();
+            })
+        } else {
+            res.status(401).json({ message: 'Unauthorized' });
+        }
     }; 
 }
 

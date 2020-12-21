@@ -1,20 +1,27 @@
 const groupQueries = require("./query");
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
+const slugify = require('slugify');
 
 const groupService = {
     creatGroup: async (userId, body, file) => {
         const id = uuidv4();
         body.id = id;
-        body.picture = file.filename ? `groupPictures/${file.filename}` : 'groupPictures/default.jpg';
+        body.picture = file ? `groupPictures/${file.filename}` : 'groupPictures/default.jpg';
+        body.slug = slugify(body.name);
         return groupQueries.creatGroup(userId, body, file)
                 .then((result) => ({status: 201, message: "Creation Success"}))
                 .catch((err) => ({status: 400, message: err}));
     },
-    joinGroup: async (userId, groupId) => {
-        return groupQueries.joinGroup(userId, groupId)
+    addInGroup: async (userId, slug, newUser) => {
+        try {
+            const groupId = await groupQueries.getGroupIdBySlug(userId, slug);
+            return groupQueries.addInGroup(userId, groupId, newUser)
                 .then((result) => ({status: 201, message: result}))
                 .catch((err) => ({status: 400, message: err}));
+        } catch (error) {
+            throw {status: 400, message: error}
+        }
     },
     leaveGroup: async (userId, groupId) => {
         return groupQueries.leaveGroup(userId, groupId)
@@ -52,6 +59,16 @@ const groupService = {
         return groupQueries.deleteGroup(userId, id)
                 .then((result) => ({status: 200, message: "Deleted"}))
                 .catch((err) => ({status: 400, message: err}));
+    },
+    getGroupIdBySlug: async (userId, slug) => {
+        return groupQueries.getGroupIdBySlug(userId, slug)
+                .then((result) => result )
+                .catch((err) => err);
+    },
+    getGroupMembers: async (userId, id) => {
+        return groupQueries.getGroupMembers(userId, id)
+                .then((result) => result )
+                .catch((err) => err);
     }
 }; 
 

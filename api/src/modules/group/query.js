@@ -3,34 +3,43 @@ const dateTime = require('../../utils/dateNow');
 
 const Query = {
     creatGroup: (userId, body) => {
-        const {id, name,picture,description} = body;
+        const {id, name,picture,description, slug} = body;
         return new Promise((resolve, reject) => {
             let date = dateTime();
-            let sqlQuery = `INSERT INTO groups (id, created_at, name, picture, description) VALUES ("${id}", ${date}, "${name}", "${picture}", "${description}")`;
+            let sqlQuery = `INSERT INTO groups (id, created_at, name, picture, description, slug) VALUES ("${id}", ${date}, "${name}", "${picture}", "${description}", "${slug}")`;
             let sqlQuery2 = `INSERT INTO groups_members (group_id, user_id, role) VALUES ("${id}", "${userId}", "admin")`;
             db.query(sqlQuery, (err, result) => {
                 if(err) reject(err);
                 db.query(sqlQuery2, (err2, result2) => {
-                    err2 ? reject(err2) : resolve('new group created');
+                    err2 ? reject(err2) : resolve('nouveau groupe créé');
                 })
             });
         });
     },
-    joinGroup: (userId, groupId) => {
+    addInGroup: (userId, groupId, newUser) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `INSERT INTO groups_members (group_id, user_id) VALUES ("${groupId}", "${userId}")`;
-            db.query(sqlQuery, (err, result) => {
-                err ? reject(err) : resolve('group successfully joined');
+            let checkUser = `SELECT role FROM groups_members WHERE (group_id = "${groupId}" AND user_id = "${userId}")`
+            let sqlQuery = `INSERT INTO groups_members (group_id, user_id) VALUES ("${groupId}", "${newUser}")`;
+            db.query(checkUser, (err, result) => {
+                if(err) reject(err);
+                result[0].role !== "admin" ? 
+                reject("Seul un administrateur du groupe peut ajouter un nouveau membre!")
+                :
+                db.query(sqlQuery, (err2, result2) => {
+                    err2 ? reject(err2) : resolve("Nouvel utilisateur ajouté au groupe")
+                })
             });
         });
     },
     leaveGroup: (userId, groupId) => {
         return new Promise((resolve, reject) => {
-            let sqlCheck = `SELECT role FROM groups_members WHERE (group_id = "${groupId}" AND user_id = "${userId}")`;
+            let sqlCheck = `SELECT user_id FROM groups_members WHERE (group_id = "${groupId}" AND role = "admin")`;
             let sqlDelete = `DELETE FROM groups_members WHERE (group_id = "${groupId}" AND user_id = "${userId}")`
             db.query(sqlCheck, (err, result) => {
                 if(err) reject(err);
-                result[0].role == "admin" ? reject("admin can't leave the group")
+                const admins = result.map( r => r.user_id);
+                const userIsAdmin = admins.includes(userId);
+                admins < 2 && userIsAdmin ? reject("Désignez un nouvel admin avant de quitter le groupe")
                 :
                 db.query(sqlDelete, (err2, result2) => {
                     err2 ? reject(err2) : resolve('succes')
@@ -58,7 +67,7 @@ const Query = {
         return new Promise((resolve, reject) => {
             let sqlQuery = `SELECT groups.*, groups_members.role FROM groups, groups_members WHERE groups_members.user_id = "${userId}" AND groups.id = groups_members.group_id AND groups.active = 1`;
             db.query(sqlQuery, (err, result) => {
-                err ? reject(err) : resolve(result[0]); // the result is always an array[0]
+                err ? reject(err) : resolve(result);
             });
         });
     },
@@ -91,5 +100,21 @@ const Query = {
             });
         });
     },
+    getGroupIdBySlug: (userId, slug) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `SELECT groups.id FROM groups, groups_members WHERE groups.slug = "${slug}" AND groups_members.group_id = groups.id AND groups_members.user_id = "${userId}"`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : result[0] ? resolve(result[0].id) : reject('group invalide');
+            });
+        })
+    },
+    getGroupMembers: (userId, id) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `SELECT * FROM groups_members WHERE group_id = "${id}" AND NOT user_id = "${userId}"`;
+            db.query(sqlQuery, (err, result) => {
+                err ? reject(err) : resolve(result);
+            });
+        })
+    }
 }
 module.exports = Query;

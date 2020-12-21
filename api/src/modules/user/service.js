@@ -3,6 +3,7 @@ const userQueries = require("./query");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
+const slugify = require('slugify');
 
 const userService = {
     register: (body, file) => {
@@ -16,31 +17,33 @@ const userService = {
             typeof password !== "string" ||
             typeof passConfirm !== "string"
             ) {
-        reject({ status: 400, message: "please enter a string in all fields" });
+        reject({ status: 400, message: "veuillez saisir une chaîne de caractères dans tous les champs" });
         }
         if (password === passConfirm) {
             let id = uuidv4();
             let avatar = file ? `avatars/${file.filename}` : 'avatars/default.jpg';
-            console.log(avatar);
+            let slug = slugify(pseudo);
             bcrypt.genSalt()
                 .then((salt) => bcrypt.hash(password, salt))
                 .then((hashedPassword) =>
-                userQueries.register({ id, lastName, firstName, pseudo, email, avatar, hashedPassword})
+                userQueries.register({ id, lastName, firstName, pseudo, email, avatar, hashedPassword, slug})
             )
-            .then((user) => resolve({ status: 201, message: "new user created" }))
+            .then((user) => {
+                resolve({ status: 201, message: "nouvel utilisateur créé" })
+            })
             .catch((err) => {
                 console.log(err);
                 if(file) fs.unlinkSync(`./files/avatars/${file.filename}`);
                 if(err.sqlMessage.includes('pseudo')){
-                    reject({ status: 401, message: "this pseudo already used!" })
+                    reject({ status: 401, message: "ce pseudo est déjà utilisé !" })
                 } else if(err.sqlMessage.includes('email')){
-                    reject({ status: 401, message: "this email already used!" })
+                    reject({ status: 401, message: "cet e-mail est déjà utilisé !" })
                 } else {
-                    reject({ status: 401, message: "an error occurred" })
+                    reject({ status: 401, message: "une erreur s'est produite" })
                 }
             });
         } else {
-            reject({ status: 400, message: "unmatched password" });
+            reject({ status: 400, message: "mot de passe incorrect" });
         }
         });
     },
@@ -52,14 +55,26 @@ const userService = {
             fs.unlinkSync(`./files/${info.avatar}`)
         }
         return userQueries.updateAvatar(userId, avatar)
-            .then(result => ({ status: 200, message: "avatar updated" }))
+            .then(result => ({ status: 200, message: "avatar mis à jour" }))
+            .catch(err => ({ status: 400, message: err }))
+    },
+    updateUser: async (userId, body) => {
+        console.log(body);
+        console.log(body.pseudo);
+        if (body.password && body.password === body.passConfirm){
+            let salt = bcrypt.genSaltSync();
+            body.passwordHash = bcrypt.hashSync(body.password, salt);
+        }
+        body.slug = "pseudo" in body ? slugify(body.pseudo) : undefined;
+        return userQueries.updateUser(userId, body)
+            .then(result => ({ status: 200, message: "utilisateur mis à jour" }))
             .catch(err => ({ status: 400, message: err }))
     },
     login: (body) => {
         return new Promise((resolve, reject) => {
             let { login, password } = body;
             if (typeof login !== "string" || typeof password !== "string") {
-                reject({ status: 400, message: "please enter a string in all fields" });
+                reject({ status: 400, message: "veuillez saisir une chaîne de caractères dans tous les champs" });
             }
             userQueries.login(login)
                 .then((result) => {
@@ -71,20 +86,68 @@ const userService = {
                         userQueries.last_logon(result.id)            
                 resolve({
                     status: 200,
-                    message: "user is logged in",
+                    message: "utilisateur connecté",
                     user: result,
                     token: token,
                 });
             }
-            reject({ status: 401, message: "wrong password entered" });
+            reject({ status: 401, message: "mauvais mot de passe saisi" });
             })
             .catch((err) =>
                 reject({
                     status: 401,
-                    message: "login error, reverify your information",
+                    message: "erreur de connexion, vérifiez vos informations",
                 })
             );
         });
+    },
+    lostPassword: (email)=> {
+        return new Promise((resolve, reject) => {
+            userQueries.getByMail(email)
+            .then((result) => {
+                const random = Array(4)
+                            .fill(null)
+                            .map(() => Math.round(Math.random() * 16).toString(16))
+                            .join(''); 
+                const token = jwt.sign({id: result.id , randKey: random}, process.env.SECRET_TOKEN, { expiresIn: 600 });
+                resolve({
+                    status: 200,
+                    message: "utilisateur trouvé",
+                    user: result,
+                    link: `${process.env.API_SERVER_ADDRESS}/reset-password/${token}`,
+                    key: random
+                });
+            })
+            .catch((err) =>
+                reject({
+                    status: 401,
+                    message: "utilisateur introuvable",
+                })
+            );
+        })
+    },
+    resetPassword: (body, token) => {
+        const {key, password, passConfirm} = body;
+        return new Promise((resolve, reject) => {
+            jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded) => {
+                if(err) reject({status: 401, message: "autorisation invalide"})
+                if(key === decoded.randKey){
+                    if(password === passConfirm){
+                        bcrypt.genSalt()
+                        .then((salt) => bcrypt.hash(password, salt))
+                        .then((hashedPassword) => userQueries.updatePassword(decoded.id, hashedPassword))
+                        .then((user) => {
+                            resolve({ status: 201, message: "mot de passe modifié", user: user})
+                        })
+                        .catch((err) => reject({status: 400, message: "une erreur s'est produite"}));
+                    } else {
+                        reject({status: 400, message: "mot de passe incorrect"});
+                    }
+                } else {
+                    reject({status: 401, message: "autorisation invalide"});
+                }
+            })
+        })
     },
     getById: (id) => {
         return new Promise((resolve, reject) => {
@@ -102,6 +165,23 @@ const userService = {
                 message: "user not found",
             }))
         })
+    },
+    getProfile: (slug) => {
+        return new Promise((resolve, reject) =>{
+            userQueries.getProfile(slug)
+            .then(result => {
+                let { password, role, active, ...user } = result[0];
+                resolve({
+                    status: 200,
+                    message: "user found",
+                    user: user
+                })
+            })
+            .catch(err => reject({
+                status: 400,
+                message: "user not found",
+            }))
+            })
     },
     addContact: (id, contactId) => {
         return new Promise((resolve, reject) => {
@@ -149,6 +229,19 @@ const userService = {
             }))
         })
     },
+    getUserIdBySlug: async (slug) => {
+        return new Promise((resolve, reject) => {
+            userQueries.getUserIdBySlug(slug)
+                .then(result => {
+                    console.log('resulta: ',result)
+                    resolve(result)
+                })
+                .catch(error => {
+                    console.log('erreur: ',error)
+                    reject(error)
+                })
+        })        
+    }
 };
 
 module.exports = userService;

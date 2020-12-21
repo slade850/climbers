@@ -2,12 +2,13 @@ const groupServices = require('./service');
 
 const groupController = {
     creatGroup: (req, res) => {
-        return groupServices.creatGroup(req.user.id, req.body, req.file)
+        const file = req.file || undefined;
+        return groupServices.creatGroup(req.user.id, req.body, file)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
-    joinGroup: (req, res) => {
-        return groupServices.joinGroup(req.user.id, req.params.id)
+    addInGroup: (req, res) => {
+        return groupServices.addInGroup(req.user.id, req.params.slug, req.body.newUser)
                 .then((result) => res.status(result.status).send({message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
