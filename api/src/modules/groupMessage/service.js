@@ -47,9 +47,9 @@ const groupMessageService = {
                             let mediaInMessage = await mediaQuery.readMediaInGroupMessage(message.id);
                             return ({...message, medias: mediaInMessage})
                         }))
-                        return ({status: 200, data: globalRes});
+                        return ({status: 200, data: globalRes, groupId: groupId});
                     } else {
-                        return ({status: 200, data: result});
+                        return ({status: 200, data: result, groupId: groupId});
                     }
                 })
                 .catch((err) => ({status: 400, message: err}));

@@ -6,8 +6,10 @@ const climberProfileService = {
                 .then((result) => ({status: 200, data: result}))
                 .catch((err) => ({status: 400, message: err}));
     },
-    getAllClimberProfile: async () => {
-        return climberProfileQueries.getAllClimberProfile()
+    getAllClimberProfile: async (query) => {
+        const limit = query.limit ? query.limit : 20;
+        const start = query.start ? query.start : 0;
+        return climberProfileQueries.getAllClimberProfile(limit, start)
                 .then(async (result) => {
                     if(result.length){
                         const globalRes = await Promise.all(result.map(async (profile) => {

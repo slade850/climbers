@@ -21,7 +21,7 @@ const Query = {
     updateClimberPracticeType: (id, body) => {
         const {practice} = body;
         return new Promise((resolve, reject) => {
-            let sqlQuery = `UPDATE climber_practice_types SET "practice = "${practice}"" WHERE id = "${id}"`;
+            let sqlQuery = `UPDATE climber_practice_types SET practice = "${practice}" WHERE id = "${id}"`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

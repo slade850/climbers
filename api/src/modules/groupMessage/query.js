@@ -39,7 +39,7 @@ const Query = {
     },
     readGroupMessage: (groupId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT * FROM groups_messages WHERE group_id = "${groupId}"`;
+            let sqlQuery = `SELECT * FROM groups_messages WHERE group_id = "${groupId}" ORDER BY create_at DESC`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

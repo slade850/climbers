@@ -63,7 +63,7 @@ getProfile: (req, res) => {
     userServices.getProfile(req.params.slug)
         .then((result) => res.status(result.status).send({message: result.message, user: result.user}))
         .catch((err) => res.status(err.status).send(err.message));
-    },    
+    },     
 addContact: (req, res) => {
     userServices.addContact(req.user.id, req.body.contactId)
     .then((result) => res.status(result.status).send({message: result.message}))

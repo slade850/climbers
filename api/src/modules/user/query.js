@@ -107,6 +107,15 @@ const Query = {
             });
         })
     },
+    getAllProfile: (limit, start) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `SELECT users.*, climber_profiles.*, strong_points.strong_point FROM users LEFT OUTER JOIN climber_profiles ON users.id = climber_profiles.user_id LEFT OUTER JOIN strong_points ON strong_points.id = climber_profiles.strong_id ORDER BY users.id ASC LIMIT ${limit} OFFSET ${start}`;
+            db.query(sqlQuery, (err, result) => {
+                console.log(err, result);
+                err ? reject(err) : resolve(result);
+            });
+        })
+    },
     addContact: (id, contactId) => {
         return new Promise((resolve, reject) => {
             let sqlQuery = `INSERT INTO users_contacts (user_id, contact) VALUES ("${id}","${contactId}")`;

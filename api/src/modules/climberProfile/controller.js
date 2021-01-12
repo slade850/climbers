@@ -2,7 +2,7 @@ const climberProfileServices = require('./service');
 
 const climberProfileController = {
     getAllClimberProfile: (req, res) => {
-        return climberProfileServices.getAllClimberProfile()
+        return climberProfileServices.getAllClimberProfile(req.query)
                 .then((result) => res.status(result.status).send({data: result.data, message: result.message}))
                 .catch((err) => res.status(err.status).send(err.message));
     },

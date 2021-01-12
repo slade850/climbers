@@ -79,7 +79,7 @@ const userService = {
             userQueries.login(login)
                 .then((result) => {
                     if (bcrypt.compareSync(password, result.password)) {
-                        let token = jwt.sign({ id: result.id, pseudo: result.pseudo, role: result.role, avatar: result.avatar },
+                        let token = jwt.sign({ id: result.id, pseudo: result.pseudo, slug: result.slug, role: result.role, avatar: result.avatar },
                                     process.env.SECRET_TOKEN,
                                     { expiresIn: 86400 }
                                     );
@@ -88,7 +88,7 @@ const userService = {
                     status: 200,
                     message: "utilisateur connecté",
                     user: result,
-                    token: token,
+                    token: token
                 });
             }
             reject({ status: 401, message: "mauvais mot de passe saisi" });

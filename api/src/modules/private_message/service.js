@@ -1,4 +1,5 @@
 const private_messageQueries = require("./query");
+const groups_messagesQueries = require("../groupMessage/query");
 const { v4: uuidv4 } = require('uuid');
 const mediaQuery = require('../media/query');
 const userService = require("../user/service");
@@ -29,14 +30,17 @@ const private_messageService = {
                 .catch((err) => ({status: 400, message: err}));
     },
     viewAllCurrentConversations: async (userId) => {
-        return private_messageQueries.viewAllCurrentConversations(userId)
-                .then((result) => ({status: 200, data: result}))
-                .catch((err) => ({status: 400, message: err}));
+        try {
+            const groupMsg = await groups_messagesQueries.readAllGroupMessage(userId);
+            const userMsg = await private_messageQueries.viewAllCurrentConversations(userId);
+            return {status: 200, userMsg: userMsg, groupMsg: groupMsg};
+        } catch (error) {
+            return {status: 400, message: err};
+        }
     },
     readPrivate_message: async (userId, contactSlug) => {
         try{
             const contactId = await userService.getUserIdBySlug(contactSlug);
-            console.log(contactId);
             return private_messageQueries.readPrivate_message(userId, contactId)
                 .then(async (result) => {
                     if(result.length){
@@ -44,9 +48,9 @@ const private_messageService = {
                             let mediaInMessage = await mediaQuery.readMediaInMessage(message.id);
                             return ({...message, medias: mediaInMessage})
                         }))
-                        return ({status: 200, data: globalRes});
+                        return ({status: 200, data: globalRes, contactId: contactId});
                     } else{
-                        return ({status: 200, data: result});
+                        return ({status: 200, data: result, contactId: contactId});
                     }
                 })
                 .catch((err) => ({status: 400, message: err}));

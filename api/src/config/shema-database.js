@@ -1,4 +1,5 @@
-const db = require("./database");
+
+/* const db = require("./database");
 
 //TABLES STRUCTURE
 const initCommentTable = () => {
@@ -191,4 +192,4 @@ const fkUsers_contactsTable = () => {
     });
 }; 
 
-fkUsers_contactsTable();
+fkUsers_contactsTable(); */

@@ -4,7 +4,10 @@ const groupMessageController = {
     creatGroupMessage: (req, res) => {
         const files = req.files || undefined;
         return groupMessageServices.creatGroupMessage(req.user.id, req.body, files)
-                .then((result) => res.status(result.status).send({message: result.message}))
+                .then((result) => {
+                    req.app.io.emit('nvMs', {group: req.body.group_id, sender: req.user.id})
+                    res.status(result.status).send({message: result.message})
+                })
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
     readAllGroupMessage: (req, res) => {
@@ -14,7 +17,7 @@ const groupMessageController = {
     },
     readGroupMessage: (req, res) => {
         return groupMessageServices.readGroupMessage(req.user.id, req.params.groupSlug)
-                .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
+                .then((result) => res.status(result.status).send({message: result.message, data: result.data, groupId: result.groupId}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
     readOneGroupMessage: (req, res) => {

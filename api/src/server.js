@@ -23,6 +23,9 @@ const userRoutes = require('./modules/user/routes');
 const eventRoutes = require('./modules/event/routes');
 const groupRoutes = require('./modules/group/routes');
 require('./config/database');
+require('./config/redis');
+const redis = require('./config/redis');
+//const jwt = require('jsonwebtoken');
 const authorize = require('./middle/authorize');
 
 app.use(cors({
@@ -37,8 +40,9 @@ app.use(express.static('public'));
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 app.get('/api/', (req, res) => {
-   res.send('wellcome to fastBlock API')
+    res.send('wellcome to fastBlock API')
 })
+//serve static medias files
 app.get('/medias/:filename' , authorize(["user","moderator","admin"]), express.static('files'), (req, res) => {
     res.sendFile(`medias/${req.params.filename}`)
 })
@@ -64,12 +68,36 @@ app.use('/api/user', userRoutes);
 app.use('/api/event', eventRoutes);
 app.use('/api/group', groupRoutes);
 
+//create http server
 const httpServer = http.createServer(app);
-const io = require('socket.io')(httpServer);
+//bind socket.io to http server
+const io = require('socket.io')(httpServer, {
+    pingInterval: 10000, // set ping intervel in ms
+    pingTimeout: 5000 // set ping timeout in ms
+});
+
 app.io = io;
+
+//middleware for socket.io
+/* io.use((socket, next) => {
+    if (socket.handshake.query && socket.handshake.query.token){
+        jwt.verify(socket.handshake.query.token, process.env.SECRET_TOKEN, (err, decoded) => {
+        if (err) return next(new Error('Authentication error'));
+        socket.pseudo = decoded.pseudo;
+        socket.id = decoded.id;
+        next();
+        } );
+    } else {
+        next(new Error('Authentication error'));
+    }
+}) */
+
 io.on('connection', client => {
     console.log(console.log(`new client connected: ${client.id}, at: ${client.handshake.address}`));
     client.on('connect', data => console.log(data));
+    client.on('register', data => {
+        redis.set(data, client.id, (err, rep) => { err ? console.log(err) : console.log(rep)});
+    });
     client.on('event', data =>  console.log(data));
     client.on('disconnect', () => { console.log(`client ${client.id} as disconnected`) });
 });

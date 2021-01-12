@@ -1,12 +1,13 @@
 const multer = require("multer");
 
+//filter for all autorized files
 const fileFilter = (req, file, cb) => {
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif|pdf|mpg|mpeg|mpeg4|mp4|avi)$/)) {
         return cb(new Error('This file type are not allowed!'), false);
     }
     cb(null, true);
 };
-
+//filter for autorized images only
 const singleImgFilter = (req, file, cb) => {
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
         return cb(new Error('This file type are not allowed!'), false);
@@ -14,8 +15,10 @@ const singleImgFilter = (req, file, cb) => {
     cb(null, true);
 }
 
+//15 Mega byte to byte conversion
 const fileSizeLimit = 15 * 1024 * 1024;
 
+//function for check type of multer error
 const checkErrorType = (error) => {
     return error instanceof multer.MulterError ?
     error.code == 'LIMIT_FILE_SIZE' ?
@@ -26,6 +29,7 @@ const checkErrorType = (error) => {
     error.message;
 }
 
+//middleware function for upload file with multer, takes 2 parameters a folder and a form field name
 const upFiles = (folder, fieldName) => {
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {

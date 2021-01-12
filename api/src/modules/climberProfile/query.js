@@ -9,9 +9,9 @@ const Query = {
             });
         });
     },
-    getAllClimberProfile: () => {
+    getAllClimberProfile: (limit, start) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT id, pseudo, slug ,avatar FROM users`;
+            let sqlQuery = `SELECT users.id, users.pseudo, users.slug ,users.avatar, climber_profiles.*, strong_points.strong_point FROM users LEFT OUTER JOIN climber_profiles ON users.id = climber_profiles.user_id LEFT OUTER JOIN strong_points ON strong_points.id = climber_profiles.strong_id ORDER BY users.id ASC LIMIT ${limit} OFFSET ${start}`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

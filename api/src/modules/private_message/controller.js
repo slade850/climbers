@@ -1,22 +1,23 @@
 const private_messageServices = require('./service'); 
+const redis = require('../../config/redis');
 
 const private_messageController = {
     creatPrivate_message: (req, res) => {
         const files = req.files || undefined;
         return private_messageServices.creatPrivate_message(req.user.id, req.body, files)
                 .then((result) => {
-                    req.app.io.emit('event', "suprem message from the back")
+                    req.app.io.emit('nvMs', {sender: req.user.id, receiver: req.body.receiver})
                     res.status(result.status).send({message: result.message})})
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
     viewAllCurrentConversations: (req, res) => {
         return private_messageServices.viewAllCurrentConversations(req.user.id)
-                .then((result) => res.status(result.status).send({data: result.data}))
+                .then((result) => res.status(result.status).send({userMsg: result.userMsg, groupMsg: result.groupMsg}))
                 .catch((err) => res.status(err.status).send(err.message));
     },
     readPrivate_message: (req, res) => {
         return private_messageServices.readPrivate_message(req.user.id, req.params.contactSlug)
-                .then((result) => res.status(result.status).send({data: result.data, message: result.message}))
+                .then((result) => res.status(result.status).send({data: result.data, contactId: result.contactId, message: result.message}))
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
     readInvitation: (req, res) => {

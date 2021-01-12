@@ -21,6 +21,7 @@
     "mysql2": "^2.2.5",
     "nodemailer": "^6.4.17",
     "nodemon": "^2.0.6",
+    "redis": "^3.0.2",
     "slugify": "^1.4.6",
     "socket.io": "^3.0.3",
     "swagger-autogen": "^2.0.2",
