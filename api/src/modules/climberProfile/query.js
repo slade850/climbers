@@ -19,7 +19,7 @@ const Query = {
     },
     getAllPracticeByProfile: (id) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT climber_practice_types.practice, levels.level_range FROM profile_practice_levels, climber_practice_types, levels WHERE profile_practice_levels.profile_id = "${id}" AND climber_practice_types.id = profile_practice_levels.practice_id AND levels.id = profile_practice_levels.level_id`;
+            let sqlQuery = `SELECT climber_practice_types.practice, levels.level_range FROM \`profile_practice_levels\`, \`climber_practice_types\`, \`levels\` WHERE profile_practice_levels.profile_id = "${id}" AND climber_practice_types.id = profile_practice_levels.practice_id AND levels.id = profile_practice_levels.level_id`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

@@ -65,7 +65,7 @@ const Query = {
     },
     readMyGroup: (userId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT groups.*, groups_members.role FROM groups, groups_members WHERE groups_members.user_id = "${userId}" AND groups.id = groups_members.group_id AND groups.active = 1`;
+            let sqlQuery = `SELECT g.*, gm.role FROM \`groups\` AS \`g\`, \`groups_members\` AS \`gm\` WHERE gm.user_id = "${userId}" AND g.id = gm.group_id AND g.active = 1`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
@@ -102,7 +102,7 @@ const Query = {
     },
     getGroupIdBySlug: (userId, slug) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT groups.id FROM groups, groups_members WHERE groups.slug = "${slug}" AND groups_members.group_id = groups.id AND groups_members.user_id = "${userId}"`;
+            let sqlQuery = `SELECT groups.id FROM \`groups\`, \`groups_members\` WHERE groups.slug = "${slug}" AND groups_members.group_id = groups.id AND groups_members.user_id = "${userId}"`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : result[0] ? resolve(result[0].id) : reject('group invalide');
             });

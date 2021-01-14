@@ -14,7 +14,7 @@ const Query = {
     },
     viewAllCurrentConversations: (userId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT DISTINCT users.id, users.pseudo, users.slug, users.avatar, (SELECT Count (private_messages.id) FROM private_messages WHERE receiver = "${userId}" AND sender = users.id AND reading = 0) as new_messages FROM users, private_messages WHERE (users.id = private_messages.receiver AND private_messages.sender = "${userId}" AND view_by_sender = 1 AND friend_request = 0) OR (private_messages.receiver = "${userId}" AND users.id = private_messages.sender AND view_by_receiver = 1 AND friend_request = 0) `;
+            let sqlQuery = `SELECT DISTINCT users.id, users.pseudo, users.slug, users.avatar, (SELECT Count (private_messages.id) FROM private_messages WHERE receiver = "${userId}" AND sender = users.id AND reading = 0) as new_messages FROM \`users\`, \`private_messages\` WHERE (users.id = private_messages.receiver AND private_messages.sender = "${userId}" AND view_by_sender = 1 AND friend_request = 0) OR (private_messages.receiver = "${userId}" AND users.id = private_messages.sender AND view_by_receiver = 1 AND friend_request = 0) `;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

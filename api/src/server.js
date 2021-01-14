@@ -76,28 +76,15 @@ const io = require('socket.io')(httpServer, {
     pingTimeout: 5000 // set ping timeout in ms
 });
 
+//attach io to app.io object for global use 
 app.io = io;
-
-//middleware for socket.io
-/* io.use((socket, next) => {
-    if (socket.handshake.query && socket.handshake.query.token){
-        jwt.verify(socket.handshake.query.token, process.env.SECRET_TOKEN, (err, decoded) => {
-        if (err) return next(new Error('Authentication error'));
-        socket.pseudo = decoded.pseudo;
-        socket.id = decoded.id;
-        next();
-        } );
-    } else {
-        next(new Error('Authentication error'));
-    }
-}) */
 
 io.on('connection', client => {
     console.log(console.log(`new client connected: ${client.id}, at: ${client.handshake.address}`));
     client.on('connect', data => console.log(data));
-    client.on('register', data => {
+    /* client.on('register', data => {
         redis.set(data, client.id, (err, rep) => { err ? console.log(err) : console.log(rep)});
-    });
+    }); */
     client.on('event', data =>  console.log(data));
     client.on('disconnect', () => { console.log(`client ${client.id} as disconnected`) });
 });

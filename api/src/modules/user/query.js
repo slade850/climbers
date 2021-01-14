@@ -149,7 +149,7 @@ const Query = {
     },
     getContact: (id) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT id AS contactId, pseudo, avatar, blocked, slug FROM users, users_contacts WHERE users_contacts.user_id = "${id}" AND users_contacts.locked = 0 AND users_contacts.active = 1 AND users_contacts.contact = users.id`;
+            let sqlQuery = `SELECT id AS contactId, pseudo, avatar, blocked, slug FROM \`users\`, \`users_contacts\` WHERE users_contacts.user_id = "${id}" AND users_contacts.locked = 0 AND users_contacts.active = 1 AND users_contacts.contact = users.id`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

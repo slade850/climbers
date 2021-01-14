@@ -32,7 +32,7 @@ const Query = {
     },
     getParticipantsByEvent: (id) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT events_participants.*, users.pseudo, users.avatar FROM events_participants, users WHERE events_participants.event_id = "${id}" AND users.id = events_participants.user_id`;
+            let sqlQuery = `SELECT events_participants.*, users.pseudo, users.avatar FROM \`events_participants\`, \`users\` WHERE events_participants.event_id = "${id}" AND users.id = events_participants.user_id`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

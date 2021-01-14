@@ -30,7 +30,7 @@ const Query = {
     },
     readPostByTheme: (theme) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT posts.*, themes.id AS theme_id, themes.theme, users.pseudo, users.avatar FROM posts, themes, users, posts_themes WHERE themes.theme = "${theme}" AND posts_themes.theme_id = themes.id AND posts.id = posts_themes.post_id AND posts.user = users.id ORDER BY posts.created_at DESC`;
+            let sqlQuery = `SELECT posts.*, themes.id AS theme_id, themes.theme, users.pseudo, users.avatar FROM \`posts\`, \`themes\`, \`users\`, \`posts_themes\` WHERE themes.theme = "${theme}" AND posts_themes.theme_id = themes.id AND posts.id = posts_themes.post_id AND posts.user = users.id ORDER BY posts.created_at DESC`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
@@ -38,7 +38,7 @@ const Query = {
     },
     readCommentsByPost: (postId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT comments.*, users.pseudo, users.avatar FROM comments, users WHERE comments.post_id = "${postId}" AND comments.active = 1 AND users.id = comments.user_id ORDER BY comments.created_at DESC`;
+            let sqlQuery = `SELECT comments.*, users.pseudo, users.avatar FROM \`comments\`, \`users\` WHERE comments.post_id = "${postId}" AND comments.active = 1 AND users.id = comments.user_id ORDER BY comments.created_at DESC`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result)
             })
@@ -46,7 +46,7 @@ const Query = {
     },
     readLikeByPost: (postId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT posts_likes.*, likes.type, users.pseudo, users.avatar FROM posts_likes , likes, users WHERE posts_likes.post_id = "${postId}" AND likes.id = posts_likes.like_id AND users.id = posts_likes.user_id`;
+            let sqlQuery = `SELECT posts_likes.*, likes.type, users.pseudo, users.avatar FROM \`posts_likes\` , \`likes\`, \`users\` WHERE posts_likes.post_id = "${postId}" AND likes.id = posts_likes.like_id AND users.id = posts_likes.user_id`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result)
             })
