@@ -1,11 +1,14 @@
 const mysql = require('mysql2'); 
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
     port: process.env.DB_PORT,
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    database: process.env.DB_BASE //if database exist
+    database: process.env.DB_BASE, //if database exist
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 }); 
 
 
@@ -21,12 +24,19 @@ connection.changeUser({ database: process.env.DB_BASE }, (err) => {
     }
 }) */
 //Connecting to database
-connection.connect((err) => {
+/* connection.connect((err) => {
     if (err) {
         console.error("error connecting: " + err.stack);
         return;
     }
     console.log("connected as id " + connection.threadId);
-}); 
+});  */
+connection.on('acquire', function (connection) {
+    console.log('Connection %d acquired', connection.threadId);
+});
+connection.query('SELECT true AS solution', function (error, results, fields) {
+    if (error) throw error;
+    if(results[0].solution) console.log('pool connction work');
+});
 
 module.exports = connection;
