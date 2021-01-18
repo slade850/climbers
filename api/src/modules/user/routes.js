@@ -10,6 +10,7 @@ router.put("/update", authorize(["user","moderator","admin"]), userController.up
 router.post("/login", userController.login);
 router.post("/lost-password", userController.lostPassword);
 router.post("/reset-password/:token", userController.resetPassword);
+router.get("/find", authorize(["user","moderator","admin"]), userController.findUser);
 router.post("/add-contact", authorize(["user","moderator","admin"]), userController.addContact);
 router.post("/accept-contact", authorize(["user","moderator","admin"]), userController.acceptContact)
 router.get("/me", authorize(["user","moderator","admin"]), userController.getById);

@@ -183,6 +183,52 @@ const userService = {
             }))
             })
     },
+    findUser: (query) => {
+        const {user, limit, start} = query
+        return new Promise((resolve, reject) =>{
+            if(user){
+                userQueries.findUser(user)
+                .then(async (result) => {
+                if(result.length){
+                    const globalRes = await Promise.all(result.map(async (userRes) => {
+                        let { password, role, active, email, ...info } = userRes;
+                        return info;
+                    }))
+                    resolve({status: 200, message: "user found", data: globalRes});
+                } else{
+                    resolve({status: 200, message: "user found", data: result});
+                }
+                })
+                .catch(err => {
+                console.log(err)
+                reject({
+                status: 400,
+                message: "user not found",
+                })
+                })
+            }else{
+                userQueries.getAllProfile(limit, start)
+                .then(async (result) => {
+                if(result.length){
+                    const globalRes = await Promise.all(result.map(async (userRes) => {
+                        let { password, role, active, email, ...info } = userRes;
+                        return info;
+                    }))
+                    resolve({status: 200, message: "user found", data: globalRes});
+                } else{
+                    resolve({status: 200, message: "user found", data: result});
+                }
+                })
+                .catch(err => {
+                console.log(err)
+                reject({
+                status: 400,
+                message: "user not found",
+                })
+            })
+            }
+        })
+    },
     addContact: (id, contactId) => {
         return new Promise((resolve, reject) => {
             userQueries.addContact(id, contactId)

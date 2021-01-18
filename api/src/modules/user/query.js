@@ -116,6 +116,15 @@ const Query = {
             });
         })
     },
+    findUser: (user) => {
+        return new Promise((resolve, reject) => {
+            let sqlQuery = `SELECT users.*, climber_profiles.*, strong_points.strong_point FROM users LEFT OUTER JOIN climber_profiles ON users.id = climber_profiles.user_id LEFT OUTER JOIN strong_points ON strong_points.id = climber_profiles.strong_id WHERE (users.lastName LIKE '%${user}%' OR users.firstName LIKE '%${user}%' OR users.pseudo LIKE '%${user}%' OR users.email LIKE '%${user}%') ORDER BY users.id ASC LIMIT 20 OFFSET 0`;
+            db.query(sqlQuery, (err, result) => {
+                console.log(err, result);
+                err ? reject(err) : resolve(result);
+            });
+        })
+    },
     addContact: (id, contactId) => {
         return new Promise((resolve, reject) => {
             let sqlQuery = `INSERT INTO users_contacts (user_id, contact) VALUES ("${id}","${contactId}")`;
@@ -149,7 +158,7 @@ const Query = {
     },
     getContact: (id) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT id AS contactId, pseudo, avatar, blocked, slug FROM \`users\`, \`users_contacts\` WHERE users_contacts.user_id = "${id}" AND users_contacts.locked = 0 AND users_contacts.active = 1 AND users_contacts.contact = users.id`;
+            let sqlQuery = `SELECT id AS contactId, firstName, lastName, pseudo, avatar, blocked, slug FROM \`users\`, \`users_contacts\` WHERE users_contacts.user_id = "${id}" AND users_contacts.locked = 0 AND users_contacts.active = 1 AND users_contacts.contact = users.id`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });

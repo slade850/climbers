@@ -63,7 +63,12 @@ getProfile: (req, res) => {
     userServices.getProfile(req.params.slug)
         .then((result) => res.status(result.status).send({message: result.message, user: result.user}))
         .catch((err) => res.status(err.status).send(err.message));
-    },     
+    },
+findUser: (req, res) => {
+    userServices.findUser(req.query)
+        .then((result) => res.status(result.status).send({message: result.message, users: result.data}))
+        .catch((err) => res.status(err.status).send(err.message));
+},         
 addContact: (req, res) => {
     userServices.addContact(req.user.id, req.body.contactId)
     .then((result) => res.status(result.status).send({message: result.message}))
@@ -76,7 +81,7 @@ acceptContact: (req, res) => {
 },    
 getContact: (req, res) => {
     userServices.getContact(req.user.id)
-        .then((result) => res.status(result.status).send({message: result.message, contacts: result.contact}))
+        .then((result) => res.status(result.status).send({message: result.message, contacts: result.contacts}))
         .catch((err) => res.status(err.status).send(err.message));
     },       
 };
