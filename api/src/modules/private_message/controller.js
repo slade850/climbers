@@ -7,6 +7,7 @@ const private_messageController = {
         return private_messageServices.creatPrivate_message(req.user.id, req.body, files)
                 .then((result) => {
                     req.app.io.emit('nvMs', {sender: req.user.id, receiver: req.body.receiver})
+                    req.app.io.emit('nvPm', {sender: req.user.id, receiver: req.body.receiver})
                     res.status(result.status).send({message: result.message})})
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
@@ -22,7 +23,11 @@ const private_messageController = {
     },
     readInvitation: (req, res) => {
         return private_messageServices.readInvitation(req.user.id)
-                .then((result) => res.status(result.status).send({message: result.message, data: result.data}))
+                .then((result) => {
+                    req.app.io.emit('nvMs', {sender: req.user.id, receiver: req.body.receiver})
+                    req.app.io.emit('nvIm', {sender: req.user.id, receiver: req.body.receiver})
+                    res.status(result.status).send({message: result.message, data: result.data})
+                })
                 .catch((err) => res.status(err.status).send({ message: err.message }));
     },
     updatePrivate_message: (req, res) => {

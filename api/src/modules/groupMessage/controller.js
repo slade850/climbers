@@ -6,6 +6,7 @@ const groupMessageController = {
         return groupMessageServices.creatGroupMessage(req.user.id, req.body, files)
                 .then((result) => {
                     req.app.io.emit('nvMs', {group: req.body.group_id, sender: req.user.id})
+                    req.app.io.emit('nvGm', {group: req.body.group_id, sender: req.user.id})
                     res.status(result.status).send({message: result.message})
                 })
                 .catch((err) => res.status(err.status).send({ message: err.message }));

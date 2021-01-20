@@ -31,7 +31,7 @@ const Query = {
     },
     readAllGroupMessage: (userId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT DISTINCT groups.id, groups.name, groups.slug, groups.picture, (SELECT Count (not_read.message_id) FROM \`not_read\`, \`groups_messages\` WHERE not_read.user_id = "${userId}" AND not_read.message_id = groups_messages.id AND groups_messages.group_id = groups.id) as new_messages FROM \`groups_messages\`, \`groups_members\`, \`groups\` WHERE (groups_members.user_id = "${userId}" AND groups.id = groups_members.group_id AND groups_messages.group_id = groups.id)`;
+            let sqlQuery = `SELECT DISTINCT groups.id, groups.name, groups.slug, groups.picture, (SELECT Count (not_read.message_id) FROM \`not_read\`, \`groups_messages\` WHERE not_read.user_id = "${userId}" AND not_read.message_id = groups_messages.id AND groups_messages.group_id = groups.id) as new_messages FROM  \`groups_members\`, \`groups\`, \`groups_messages\` WHERE (groups_members.user_id = "${userId}" AND groups.id = groups_members.group_id AND groups_messages.group_id = groups.id)`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
