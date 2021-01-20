@@ -34,7 +34,7 @@ const Query = {
     },
     readInvitation: (userId) => {
         return new Promise((resolve, reject) => {
-            let sqlQuery = `SELECT * FROM private_messages WHERE receiver = "${userId}" AND friend_request = 1`;
+            let sqlQuery = `SELECT private_messages.id, private_messages.sender AS senderId, users.pseudo, users.lastName, users.firstName, users.avatar FROM \`private_messages\`, \`users\` WHERE private_messages.receiver = "${userId}" AND private_messages.friend_request = 1 AND users.id = private_messages.sender AND view_by_receiver = 1`;
             db.query(sqlQuery, (err, result) => {
                 err ? reject(err) : resolve(result);
             });
